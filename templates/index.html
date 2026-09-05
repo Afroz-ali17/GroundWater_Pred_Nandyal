@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Machine Learning GroundWater Forecasting & Quality Prediction (2022-2030) | Nandyal District</title>
+  <meta name="description" content="Machine Learning Approach for GroundWater Level Forecasting and Quantity Prediction in Nandyal District, AP (2022-2030).">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-icon">🌊</div>
+      <div class="brand-title">
+        <h1>Nandyal HydroML Platform</h1>
+        <p>GroundWater Level Forecasting & Water Quality Assessment (2022–2030)</p>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <!-- Day & Night Mode Button -->
+      <button class="dn-toggle-btn" id="dnToggleBtn" onclick="toggleDayNightMode()" title="Toggle Day/Night Mode">
+        <span id="dnIcon">🌙</span> <span id="dnLabel">Night Mode</span>
+      </button>
+
+      <a href="/api/export" class="btn-action" id="downloadCsvBtn">
+        📥 Export Dataset CSV (2022-2030)
+      </a>
+      
+      <button onclick="window.print()" class="btn-secondary">
+        🖨️ Print Project Report
+      </button>
+    </div>
+  </header>
+
+  <div class="dashboard-container">
+    
+    <!-- Hero Project Banner -->
+    <div class="hero-banner">
+      <div class="hero-text" style="flex: 1;">
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+          <span style="background: var(--primary-gradient); color: #fff; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.82rem;">2022–2030 EXTENDED FORECAST</span>
+          <span style="color: var(--primary-cyan); font-weight: 700; font-size: 0.88rem;">FINAL YEAR B.TECH PROJECT</span>
+        </div>
+        <h2>MACHINE LEARNING APPROACH FOR GROUNDWATER LEVEL FORECASTING AND QUANTITY PREDICTION</h2>
+        <p style="margin-top: 6px;">Study Area: <strong>Nandyal District, AP</strong> | Forecasting Horizon: <strong>2026 to 2030 (52 Months)</strong> | Models: <strong>RF, SVM, DT, ANN, XGBoost & Ensemble</strong></p>
+      </div>
+    </div>
+
+    <!-- Metric Overview Cards -->
+    <div class="metrics-grid">
+      
+      <div class="glass-card metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Current Water Level</span>
+          <span class="metric-icon">📉</span>
+        </div>
+        <div>
+          <span class="metric-value" id="val-water-level">--</span>
+          <span class="metric-unit"> m bgl</span>
+        </div>
+        <div class="metric-footer">
+          <span>Depth below ground level (<span id="val-last-date">--</span>)</span>
+        </div>
+      </div>
+
+      <div class="glass-card metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Dynamic Storage Volume</span>
+          <span class="metric-icon">🚰</span>
+        </div>
+        <div>
+          <span class="metric-value" id="val-storage-mcm">--</span>
+          <span class="metric-unit"> MCM</span>
+        </div>
+        <div class="metric-footer">
+          <span>Available Aquifer Capacity (Million m³)</span>
+        </div>
+      </div>
+
+      <div class="glass-card metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Water Quality Index (WQI)</span>
+          <span class="metric-icon">🧪</span>
+        </div>
+        <div>
+          <span class="metric-value" id="val-wqi-score">--</span>
+          <span class="metric-unit"> WQI</span>
+        </div>
+        <div class="metric-footer">
+          <span id="val-wqi-status">Assessing pH, EC, TDS, Fluoride</span>
+        </div>
+      </div>
+
+      <div class="glass-card metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Multi-Step Forecast Horizon</span>
+          <span class="metric-icon">🔮</span>
+        </div>
+        <div>
+          <span class="metric-value" id="val-forecast-horizon">52</span>
+          <span class="metric-unit"> Months</span>
+        </div>
+        <div class="metric-footer">
+          <span>Extended Horizon (Sep 2026 to Dec 2030)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Plotly Charts Grid -->
+    <div class="main-charts-grid">
+      
+      <!-- Primary Groundwater Level Chart (Plotly) -->
+      <div class="glass-card">
+        <div class="section-title">
+          <div class="title-left">
+            <span class="title-icon">📊</span> Nandyal District Groundwater Level Trend & Multi-Step ML Forecast (2022–2030)
+          </div>
+        </div>
+        <div class="chart-controls">
+          <button class="btn-toggle active" data-model="Ensemble" onclick="selectModelChart('Ensemble')">Weighted Ensemble</button>
+          <button class="btn-toggle" data-model="RandomForest" onclick="selectModelChart('RandomForest')">Random Forest (RF)</button>
+          <button class="btn-toggle" data-model="SVM" onclick="selectModelChart('SVM')">SVM / SVR</button>
+          <button class="btn-toggle" data-model="DecisionTree" onclick="selectModelChart('DecisionTree')">Decision Tree (DT)</button>
+          <button class="btn-toggle" data-model="ANN" onclick="selectModelChart('ANN')">Neural Network (ANN)</button>
+          <button class="btn-toggle" data-model="XGBoost" onclick="selectModelChart('XGBoost')">XGBoost</button>
+        </div>
+        <div class="chart-wrapper">
+          <div id="groundwaterPlotly" style="width:100%; height:100%;"></div>
+        </div>
+      </div>
+
+      <!-- Hydrogeological Storage & Water Quality Chart (Plotly) -->
+      <div class="glass-card">
+        <div class="section-title">
+          <div class="title-left">
+            <span class="title-icon">💧</span> Dynamic Aquifer Storage Volume (MCM)
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <div id="quantityPlotly" style="width:100%; height:100%;"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Groundwater Quality Assessment Panel (pH, EC, TDS, Nitrate, Fluoride) -->
+    <div class="glass-card">
+      <div class="section-title">
+        <div class="title-left">
+          <span class="title-icon">🧪</span> Groundwater Quality Assessment & Hydro-Chemical Parameters (Nandyal District)
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;" id="wqParamsGrid">
+        
+        <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">pH Level</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);" id="wq-ph">--</div>
+          <div style="font-size: 0.76rem; color: var(--accent-emerald);">Ideal Range: 6.5 - 8.5</div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Electrical Conductivity (EC)</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);" id="wq-ec">-- µS/cm</div>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Standard Limit: &lt; 1500 µS/cm</div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Total Dissolved Solids (TDS)</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);" id="wq-tds">-- mg/L</div>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Standard Limit: &lt; 500 mg/L</div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Nitrate Concentration (NO₃⁻)</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);" id="wq-nitrate">-- mg/L</div>
+          <div style="font-size: 0.76rem; color: var(--text-muted);">Standard Limit: &lt; 45 mg/L</div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Fluoride Concentration (F⁻)</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);" id="wq-fluoride">-- mg/L</div>
+          <div style="font-size: 0.76rem; color: var(--accent-amber);">Standard Limit: &lt; 1.5 mg/L</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- What-If Scenario Simulator & ML Benchmark Matrix -->
+    <div class="main-charts-grid">
+      
+      <!-- Scenario Simulator Panel -->
+      <div class="glass-card simulator-panel">
+        <div class="section-title">
+          <div class="title-left">
+            <span class="title-icon">🎛️</span> "What-If" Climate & Extraction Scenario Simulator (up to 2030)
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Simulated Monsoon Rainfall Anomaly</span>
+            <span class="control-val" id="lbl-rainfall">0%</span>
+          </div>
+          <input type="range" id="slider-rainfall" min="-50" max="50" step="5" value="0" oninput="updateScenario()">
+          <span style="font-size: 0.78rem; color: var(--text-muted);">-50% Severe Drought | +50% Heavy Monsoon</span>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Groundwater Draft / Extraction Multiplier</span>
+            <span class="control-val" id="lbl-extraction">1.0x</span>
+          </div>
+          <input type="range" id="slider-extraction" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateScenario()">
+          <span style="font-size: 0.78rem; color: var(--text-muted);">0.5x Conservation | 2.0x Intensive Pumping</span>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Simulation Horizon (Months)</span>
+            <span class="control-val" id="lbl-horizon">52 M</span>
+          </div>
+          <input type="range" id="slider-horizon" min="6" max="52" step="6" value="52" oninput="updateScenario()">
+        </div>
+
+        <div style="background: rgba(6, 182, 212, 0.06); border: 1px solid var(--border-color); padding: 14px; border-radius: var(--radius-md); font-size: 0.85rem;">
+          <div style="font-weight: 700; color: var(--primary-cyan); margin-bottom: 4px;">Scenario Forecast Projection (up to 2030):</div>
+          <div id="sim-impact-summary">Adjust sliders above to test climate and extraction scenarios.</div>
+        </div>
+      </div>
+
+      <!-- ML Models Benchmark Matrix -->
+      <div class="glass-card">
+        <div class="section-title">
+          <div class="title-left">
+            <span class="title-icon">🏆</span> Machine Learning Model Benchmark Matrix
+          </div>
+        </div>
+        <div class="benchmark-table-container">
+          <table class="data-table" id="benchmarkTable">
+            <thead>
+              <tr>
+                <th>Model Architecture</th>
+                <th>RMSE (m)</th>
+                <th>MAE (m)</th>
+                <th>R² Score</th>
+                <th>MAPE (%)</th>
+              </tr>
+            </thead>
+            <tbody id="benchmarkTbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <footer class="app-footer">
+    <p>Machine Learning Approach for GroundWater Level Forecasting & Quantity Prediction (2022–2030) | Nandyal District</p>
+  </footer>
+
+  <!-- Client Script -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
