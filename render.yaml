@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: nandyal-groundwater-ml
+    env: python
+    buildCommand: pip install -r requirements.txt && python run_pipeline.py
+    startCommand: gunicorn app:app
+    plan: free
